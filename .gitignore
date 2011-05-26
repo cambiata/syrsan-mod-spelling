@@ -1,0 +1,8 @@
+.DS_Store
+.actionScriptProperties
+.flexProperties
+.project
+.settings/*
+html-template/*
+bin-debug/*
+.FlexUnitSettings/*

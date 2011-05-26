@@ -1,0 +1,11 @@
+<data title="What species?" info="Write the names of the species in the text box to the right of each picture. In English, please!" readyMessage="Contratulations! Please continue with..!">
+
+	<item picture="pictures/elephant.png" correctTag="elephant|elelphants"  />
+
+	<item picture="pictures/chimp.png" correctTag="chimpanzee|monkey|ape" useWrongCharsMask="false" />
+
+	<item picture="pictures/rhino.png" correctTag="rhinoceros" displayWrongChars="false" />
+
+	<item picture="pictures/zebras.png" correctTag="zebra|zebras" caseSensitive="true" />
+	
+</data>

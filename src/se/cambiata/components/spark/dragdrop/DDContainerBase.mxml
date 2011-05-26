@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:dragdrop="se.cambiata.components.spark.dragdrop.*"
+		 width="100%"
+		 height="100%">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			
+			import se.cambiata.utils.string.StringUtils;
+			import se.cambiata.utils.string.calculators.IStringSim;
+			
+			import spark.skins.spark.PanelSkin;
+
+			private var _tag:String = '';
+
+			[Bindable]
+			public function get tag():String {
+				return _tag;
+			}
+
+			public function set tag(value:String):void {
+				_tag = value;
+			}
+
+
+			//--------------------------------------------------------------------------
+
+			private var _cloneOnDrop:Boolean = false;
+
+			public function get cloneOnDrop():Boolean {
+				return _cloneOnDrop;
+			}
+
+			public function set cloneOnDrop(value:Boolean):void {
+				_cloneOnDrop = value;
+			}
+
+			/* 			private var _removeCloneOnDrop:Boolean = false;
+
+			   public function get removeCloneOnDrop():Boolean
+			   {
+			   return _removeCloneOnDrop;
+			   }
+
+			   public function set removeCloneOnDrop(value:Boolean):void
+			   {
+			   _removeCloneOnDrop = value;
+			   }
+			 */
+
+
+			//------------------------------------------------			
+
+			private var _correctTag:String = '';
+
+			public function get correctTag():String {
+				return _correctTag;
+			}
+
+			public function set correctTag(value:String):void {
+				_correctTag = value;
+			}
+
+			//----------------------------------------------------
+
+			private var _calculator:IStringSim = null;
+
+			public function get calculator():IStringSim {
+				return _calculator;
+			}
+
+			public function set calculator(value:IStringSim):void {
+				_calculator = value;
+			}
+
+
+
+			//------------------------------------------------
+
+			private var _result:Number = 0;
+
+			[Bindable]
+			public function get result():Number {
+				return _result;
+			}
+
+			public function set result(value:Number):void {
+				_result = value;
+			}
+
+			//---------------------------------------------------
+
+			private var _autoDisplayCorrect:Boolean = true;
+
+			public function get autoDisplayCorrect():Boolean {
+				return _autoDisplayCorrect;
+			}
+
+			public function set autoDisplayCorrect(value:Boolean):void {
+				_autoDisplayCorrect = value;
+			}
+
+
+
+			private function checkResult():Number {
+				if (!this.correctTag)
+					return 0;
+				if (!this.calculator)
+					return 0.5;
+				return this.calculator.calculate(this.tag, this.correctTag);
+			}
+
+			//-----------------------------------------------------------------------
+
+			protected function recalc(index:int = -1):void {
+				this.tag = this.getTag(index);
+				this.title = this.tag;
+
+				this.result = this.checkResult();
+
+				this.setAutoDisplay();
+			}
+
+			private function setAutoDisplay():void {
+				if (!this.autoDisplayCorrect)
+					return;
+				if (!this.tag)
+					return;
+				if (!this.correctTag)
+					return;
+
+				var tagLenght:int = this.tag.length;
+				var correctLenght:int = this.correctTag.length;
+
+				var tagChar:String;
+				var correctChar:String;
+
+				trace('---------------------------------------');
+
+				var stateString:String = '';
+				var statesArray:Array = [];
+
+
+				for (var i:int = 0; i < tagLenght; i++) {
+					tagChar = this.tag.substr(i, 1);
+					correctChar = this.correctTag.substr(i, 1);
+
+					if (tagChar == correctChar) {
+						trace(i, tagChar, correctChar, 'correct', this.numElements);
+						stateString = 'correct';
+					} else {
+						trace(i, tagChar, correctChar, 'wrong', this.numElements);
+						stateString = 'wrong';
+					}
+					if (tagChar == '-')
+						stateString = 'default';
+
+					statesArray.push(stateString);
+
+					/* 					if (!this.getElementAt(i)) return;
+
+					   trace('Ykka');
+
+
+
+					   if (this.getElementAt(i) is DDItem) {
+					   DDItem(this.getElementAt(i)).currentState =stateString ;
+					   }
+
+					   if (this.getElementAt(i) is DDTarget) {
+					   DDTarget(this.getElementAt(i)).currentState =stateString ;
+					   }
+					 */
+
+
+				}
+
+				trace(statesArray);
+
+
+				if (this is DDContainerTargets) {
+
+					var ddct:DDContainerTargets = DDContainerTargets(this);
+					i = 0;
+					for each (var state:String in statesArray) {
+						if (!ddct.group.getElementAt(i))
+							return;
+						trace(state, ddct.group.getElementAt(i));
+
+						if (ddct.group.getElementAt(i) is DDTarget) {
+							DDTarget(ddct.group.getElementAt(i)).currentState = state;
+
+						}
+						i++;
+					}
+
+				}
+
+			}
+
+			private function getTag(index:int = -1):String {
+				var tag:String = '';
+
+				trace('getTag', index);
+
+
+				if (this is DDContainerTarget) {
+
+					for (var i:int = 0; i < this.numElements; i++) {
+
+						if (i != index) {
+							if (this.getElementAt(i) is DDItem) {
+								tag += DDItem(this.getElementAt(i)).tag;
+							}
+
+							/* 							if (this.getElementAt(i) is DDTarget) {
+							   trace('GETTTT TTTAG');
+							   tag += DDTarget(DDContainerTargets(this).group.getElementAt(i)).tag;
+							 } */
+						}
+
+						/* 						if (this is DDContainerTargets) {
+						   if (DDContainerTargets(this).group.getElementAt(i) is DDTarget) {
+						   trace('GETTTT TTTAG');
+						   tag += DDTarget(DDContainerTargets(this).group.getElementAt(i)).tag;
+						   }
+						 } */
+
+
+					}
+				}
+
+				if (this is DDContainerTargets) {
+					trace('this is DDContainerTargets');
+					var ddct:DDContainerTargets = DDContainerTargets(this);
+
+					for (var i:int = 0; i < ddct.group.numElements; i++) {
+						if (i != index) {
+							if (ddct.group.getElementAt(i) is DDTarget) {
+								trace('GETTTT TTTAG');
+								tag += DDTarget(ddct.group.getElementAt(i)).tag;
+							}
+						}
+
+
+						trace(i);
+					}
+
+				}
+
+
+
+				return tag;
+			}
+
+			public function scramble():void {
+				var numElements:int = this.numElements;
+				for (var i:int = 0; i < numElements; i++) {
+					var randomIndex:int = Math.abs(Math.random() * numElements);
+					var el:IVisualElement = this.getElementAt(0);
+					this.setElementIndex(el, randomIndex);
+				}
+				this.recalc();
+			}
+			
+			private var _scrambleInit:Boolean 
+			
+			public function get scrambleInit():Boolean
+			{
+				return _scrambleInit;
+			}
+			
+			
+			public function set scrambleInit(value:Boolean):void
+			{
+				_scrambleInit = value;
+			}
+
+;
+		]]>
+	</fx:Script>
+
+
+
+</s:Panel>

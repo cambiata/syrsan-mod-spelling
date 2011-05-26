@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
+		 dragDrop="onDragDrop(event)" 
+		 dragEnter="onDragEnter(event)"
+		 
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.core.IUIComponent;
+			import mx.events.DragEvent;
+			import mx.managers.DragManager;
+			
+			protected function onDragEnter(event:DragEvent):void
+			{
+				
+				//DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
+				
+				
+				var ddItem:DDItem;
+				
+				if (event.dragInitiator is DDItem) {
+					ddItem = DDItem(event.dragInitiator);
+				}
+				
+				if (ddItem != null) {
+					trace('accept');
+					DragManager.acceptDragDrop(event.currentTarget as IUIComponent);	
+				}
+				
+				
+			}
+			
+			
+			protected function onDragDrop(event:DragEvent):void
+			{
+				//trace('drop');
+				//event.currentTarget.addElement(event.dragInitiator);
+				
+				var ddItem:DDItem;
+				
+				if (event.dragInitiator is DDItem) {
+					ddItem = DDItem(event.dragInitiator);
+				}
+				
+				if (ddItem != null) {
+					//DragManager.acceptDragDrop(ddItem);	
+					trace(ddItem.label);
+					event.currentTarget.addElement(event.dragInitiator);
+					//this.groupLabel.addElement(IVisualElement());
+					//ddItem.x = 0;
+					//ddItem.y = 0;
+					ddItem.height = ddItem.defaultHeight;
+					ddItem.width = ddItem.defaultWidth;
+					ddItem.backgroundColor = ddItem.defaultBackgroundColor;
+					this.dispatchEvent( new ProgressEvent(ProgressEvent.PROGRESS, false, false, 0, 0));
+				}
+				
+				
+			}
+			
+			public function clearItems():void {
+				this.removeAllElements();
+			}
+			
+			public function createItem(correctTag:String, imgSource:String): void {
+				var ddItem:DDItem = new DDItem();
+				
+				//ddItem.imgSource = imgSource;
+				ddItem.tag = correctTag;
+				this.addElement(ddItem);
+				
+			}
+			
+			public function scramble() : void {
+				
+				var numElements:int = this.numElements;
+				for (var i:int = 0; i < 20; i++) {
+					var idx:int = Math.abs(Math.random() * numElements);
+					this.setElementIndex(this.getElementAt(idx), 0);
+				}
+				
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+</s:Panel>

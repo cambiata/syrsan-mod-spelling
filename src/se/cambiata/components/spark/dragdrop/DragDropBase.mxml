@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100" height="100">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			
+			
+			//public var container:DragDropContainer = null;
+			
+			
+			private var _tag:String;
+			
+			[Bindable]
+			public function get tag():String
+			{
+				return _tag;
+			}
+			
+			public function set tag(value:String):void
+			{
+				_tag = value;
+			}
+			
+			
+		]]>
+	</fx:Script>
+</s:Group>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+				 xmlns:s="library://ns.adobe.com/flex/spark"
+				 xmlns:mx="library://ns.adobe.com/flex/mx"
+				 xmlns:dragdrop="se.cambiata.components.spark.dragdrop.*"
+				 width="120"
+				 height="40"
+				 mouseDown="onMouseDown(event)"
+				 
+				 
+				 creationComplete="init(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.IUIComponent;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.DragManager;
+			import mx.utils.ColorUtil;
+			
+			import se.cambiata.components.spark.dragdrop.skins.DDSkinBase;
+
+			
+			
+			
+			public var defaultWidth:int = 120;
+			public var defaultHeight:int = 40;
+			public var defaultBackgroundColor:uint = 0xCCCCCC;
+			
+			
+			private var _tag:String = '-';
+			[Bindable]
+			public function get tag():String
+			{
+				return _tag;
+			}
+			public function set tag(value:String):void
+			{
+				_tag = value;
+			}			
+			
+			
+			protected var _backgroundColor:uint = 0xCCCCCC;
+			
+			[Bindable]
+			private var lighterColor: uint = 0xFFFFFF;
+			
+			[Bindable]
+			public function get backgroundColor():uint
+			{
+				return _backgroundColor;
+			}
+			
+			public function set backgroundColor(value:uint):void
+			{
+				_backgroundColor = value;
+				this.lighterColor = ColorUtil.adjustBrightness(_backgroundColor, 100);
+			}				
+			
+			private var _label:String;
+
+			public function get label():String {
+				return _label;
+			}
+
+			public function set label(value:String):void {
+				if (value == null)
+					return;
+				_label = value;
+				this.lbl.text = _label;
+				//DDSkinBase(this.skin).lbl.text = _label;
+			}
+
+
+			protected function onMouseDown(event:MouseEvent):void {
+				this.currentOwner = this.owner;	
+				DragManager.doDrag(event.currentTarget as IUIComponent, null, event);
+			}
+
+
+			protected function init(event:FlexEvent):void {
+				// TODO Auto-generated method stub
+				//this.setStyle('skinClass', DDSkinBase);
+				this.addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+				this.addEventListener(MouseEvent.ROLL_OUT, onRollOut);
+				
+				
+			}
+
+			private function onRollOver(e:MouseEvent): void {
+				//trace('onRollOver');
+				
+			}
+			private function onRollOut(e:MouseEvent): void {
+				//trace('onRollOut');
+				
+			}
+			
+			
+			
+			
+			public var currentOwner: DisplayObjectContainer;
+			
+			//------------------------------------------------------------------------
+
+			public function clone():DDItem {
+
+				var clone:DDItem = new DDItem();
+
+				clone.tag = this.tag;
+				clone.backgroundColor = this.backgroundColor;
+				clone.label = this.label;
+
+				return clone;
+
+			}
+			
+			public function equals(ddItem:DDItem): Boolean {
+				return (this.tag == ddItem.tag);
+			}
+			
+			private var _imgSource:String = '';
+
+			[Bindable]
+			public function get imgSource():String
+			{
+				return _imgSource;
+			}
+
+			public function set imgSource(value:String):void
+			{
+				_imgSource = value;
+			}
+
+
+
+		]]>
+	</fx:Script>
+
+	
+	<s:Rect width="100%" height="100%" includeIn="rect" radiusX="3" radiusY="3">
+		<s:stroke>
+			<s:SolidColorStroke color="0x555555" />
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="{this.lighterColor}" />
+				<s:GradientEntry color="{this.backgroundColor}" />
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter blurX="4" blurY="4" alpha="0.22" 
+								distance="4" angle="45" knockout="false" />
+		</s:filters>	
+	</s:Rect>
+
+	
+	
+	
+	<s:Ellipse width="100%" height="100%" includeIn="ellipse">
+		<s:stroke>
+			<s:SolidColorStroke color="0x555555" />
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="{this.lighterColor}" />
+				<s:GradientEntry color="{this.backgroundColor}" />
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter blurX="4" blurY="4" alpha="0.22" 
+								distance="4" angle="45" knockout="false" />
+		</s:filters>	
+	</s:Ellipse>
+	
+	
+	<mx:Image source="{this.imgSource}" top="4" bottom="4" left="4" right="4" visible="{this.imgSource > ''}"/>
+
+	
+	<s:Label fontSize="16"
+			 id="lbl"
+			 text="{this.tag}"
+			 horizontalCenter="0"
+			 verticalCenter="0"/>
+	
+	<!--<s:Button id="btnQuestion" right="0" top="0" width="24" height="24" visible="false" click="Alert.show('click');" />-->
+	
+	<s:states>
+		<s:State name="rect" />
+		<s:State name="ellipse" />
+	</s:states>
+	
+
+</s:Group>

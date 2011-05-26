@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dragdrop:DDContainerBase xmlns:fx="http://ns.adobe.com/mxml/2009"
+						  xmlns:s="library://ns.adobe.com/flex/spark"
+						  xmlns:mx="library://ns.adobe.com/flex/mx"
+						  xmlns:dragdrop="se.cambiata.components.spark.dragdrop.*"
+						  creationComplete="init(event)"
+						  width="100%"
+						  height="100%"						  
+						  xmlns:layouts="org.flexlayouts.layouts.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<fx:Script>
+
+		<![CDATA[
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			
+			import se.cambiata.components.spark.dragdrop.skins.DDSkinBase;
+			private var _numTargets:int = 5;
+
+			public function get numTargets():int {
+				return _numTargets;
+			}
+
+			public function set numTargets(value:int):void {
+				_numTargets = value;
+				this.createTargets();
+			}
+
+			private function createTargets():void {
+				//trace('createTargets');
+				if (!this.group)
+					return;
+				//trace('createTargets 2');
+
+				this.group.removeAllElements();
+				for (var i:int; i < this.numTargets; i++) {
+					var dropTarget:DDTarget = new DDTarget();
+					this.group.addElement(dropTarget);
+					dropTarget.addEventListener(Event.CHANGE, onTargetChange);
+						//dropTarget.setStyle('skinClass', DDSkinBase);
+				}
+			}
+
+			protected function init(event:FlexEvent):void {
+				this.createTargets();
+				if (this.scrambleInit) this.scramble();
+			}
+
+			protected function onTargetChange(e:Event):void {
+				trace('DDContainerTargets onTargetChange');
+				this.recalc();
+			}
+
+			//------------------------------------------------------------------
+
+			/* 			private function recalc(): void {
+			   this.tag = this.getTag();
+			   this.title = this.tag;
+			   }
+
+			   private function getTag():String {
+			   var tag:String = '';
+			   for(var i:int = 0; i < this.numElements; i++) {
+			   tag += DDBase(this.getElementAt(i)).tag;
+			   }
+			   return tag;
+			 } */
+			
+			private var _backgroundImage:String;
+
+			[Bindable]
+			public function get backgroundImage():String
+			{
+				return _backgroundImage;
+			}
+
+			public function set backgroundImage(value:String):void
+			{
+				_backgroundImage = value;
+			}
+
+			
+		]]>
+	</fx:Script>
+
+<!--	<s:Rect width="100%" height="100%" >
+		<s:fill>
+			<s:SolidColor color="{this.backgroundColor}"
+		</s:fill>
+	</s:Rect>-->
+	
+	<mx:Image id="img"
+			  source="{this.backgroundImage}" width="{this.img.height}" height="100%" horizontalCenter="0" verticalCenter="0"/>
+	
+	<s:Group top="8"
+			 bottom="8"
+			 left="8"
+			 right="8"
+			 id="group">
+
+		<s:layout>
+			<layouts:CircleLayout rotation="300"/>
+		</s:layout>
+
+
+	</s:Group>
+
+
+</dragdrop:DDContainerBase>

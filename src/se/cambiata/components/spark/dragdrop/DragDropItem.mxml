@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dragdrop:DragDropBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:dragdrop="se.cambiata.components.spark.dragdrop.*" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100"
+		 height="100"
+		 mouseDown="onMouseDown(event)"
+		 creationComplete="init(event)"
+		 >
+
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.IUIComponent;
+			import mx.events.FlexEvent;
+			import mx.managers.DragManager;
+			protected function onMouseDown(event:MouseEvent):void
+			{
+				DragManager.doDrag(event.currentTarget as IUIComponent, null, event);
+			}
+			
+			private var _label:String;			
+
+			public function get label():String
+			{
+				return _label;
+			}
+
+			public function set label(value:String):void
+			{
+				if (value == null) return;
+				_label = value;
+				this.lbl.text = _label;
+			}
+			
+			
+			
+			[Bindable]
+			private var _backgroundColor:uint = 0xFFAAAA;
+
+			public function get backgroundColor():uint
+			{
+				return _backgroundColor;
+			}
+
+			public function set backgroundColor(value:uint):void
+			{
+				_backgroundColor = value;
+				
+			}
+			
+
+			//------------------------------------------------------------------------
+			
+			public function clone(): DragDropItem {
+				
+				var clone:DragDropItem = new DragDropItem();
+				
+				clone.tag = this.tag;
+				clone.backgroundColor = this.backgroundColor;
+				clone.label = this.label;
+				
+				return clone;
+				
+			}
+			
+			
+			
+
+			protected function init(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Ellipse width="100%" height="100%" >
+		<s:fill>
+			<s:SolidColor color="{this._backgroundColor}" />
+		</s:fill>
+	</s:Ellipse>
+	<s:Label fontSize="16" id="lbl" text="Test" horizontalCenter="0" verticalCenter="0"/>	
+	
+</dragdrop:DragDropBase>

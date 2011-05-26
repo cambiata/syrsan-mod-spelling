@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="136"
+		 height="176"
+		 dragEnter="onDragEnter(event)"
+		 dragDrop="onDragDrop(event)"
+		 creationComplete="init(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.core.IUIComponent;
+			import mx.core.IVisualElement;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.PopUpAnchor;
+			import spark.events.ElementExistenceEvent;
+
+			protected function onDragEnter(event:DragEvent):void {
+
+				//DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
+
+
+				var ddItem:DDItem;
+
+				if (event.dragInitiator is DDItem) {
+					ddItem = DDItem(event.dragInitiator);
+				}
+
+				if (ddItem != null && (this.groupLabel.numElements == 0)) {
+					trace('accept');
+					DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
+				}
+
+
+			}
+
+
+			protected function onDragDrop(event:DragEvent):void {
+				//trace('drop');
+				//event.currentTarget.addElement(event.dragInitiator);
+
+				var ddItem:DDItem;
+
+				if (event.dragInitiator is DDItem) {
+					ddItem = DDItem(event.dragInitiator);
+				}
+
+				if (ddItem != null) {
+					//DragManager.acceptDragDrop(ddItem);	
+					trace(ddItem.label);
+					//event.currentTarget.addElement(
+					this.groupLabel.addElement(IVisualElement(event.dragInitiator));
+					ddItem.x = 0;
+					ddItem.y = 0;
+					ddItem.width = 120;
+					ddItem.height = 30;
+
+					//-----------------------------------------------
+
+					this.tag = ddItem.tag;
+					
+					var result:Number = this.checkResult();
+					
+					if (this.result == 1) {
+						ddItem.backgroundColor = 0xAAFFAA;
+					} else {
+						ddItem.backgroundColor = 0xFFAAAA;
+					}
+
+				}
+
+
+			}
+
+			//------------------------------------------------
+
+			
+			
+			
+			private var _tag:String = '-';
+
+			[Bindable]
+			public function get tag():String {
+				return _tag;
+			}
+
+			public function set tag(value:String):void {
+				_tag = value;
+				//trace('Check correct', this._tag, this.correctTag);
+				//this.checkResult();
+				//this.displayResult();
+			}
+
+
+			private var _correctTag:String = '-';
+
+			[Bindable]
+			public function get correctTag():String {
+				return _correctTag;
+			}
+
+			public function set correctTag(value:String):void {
+				_correctTag = value;
+			}
+
+
+
+			private var _imgSource:String = '';
+
+			[Bindable]
+			public function get imgSource():String {
+				return _imgSource;
+			}
+
+			public function set imgSource(value:String):void {
+				_imgSource = value;
+			}
+
+
+
+
+			private var _result:Number = 0;
+
+			[Bindable]
+			public function get result():Number {
+				return _result;
+			}
+
+			public function set result(value:Number):void {
+				_result = value;
+			}
+
+
+			// --------------------------------------------------------------------------
+
+
+			private function checkResult():Number {
+				this.result = 0;
+				if (this.tag == this.correctTag) {
+					
+					if (this.useSpellingPopup) {
+						var ddTcsp:DDTargetCardSpellingPopup = new DDTargetCardSpellingPopup();	
+						ddTcsp.imgSource = this.imgSource;
+						ddTcsp.correctTag = this.correctTag;
+						
+						//trace(this.owner);
+						ddTcsp.ddTargetCard = this;
+						PopUpManager.addPopUp(ddTcsp, this.owner, true);	
+						PopUpManager.centerPopUp(ddTcsp);
+					} else {
+						this.setResult(1);
+					}
+				}
+
+				return this.result;
+			}
+			
+			public function setResult(result:Number): void {
+				this.result = result;
+				this.dispatchEvent(new ProgressEvent(ProgressEvent.PROGRESS, false, false, this.result, 1));
+				this.displayResult();
+			}
+
+			private function displayResult():void {
+
+				trace('displayResult');
+				var ddItem:DDItem;
+
+				trace(this.groupLabel.numElements, this.groupLabel.getElementAt(0));
+				if (this.groupLabel.numElements > 0) {
+					ddItem = DDItem(this.groupLabel.getElementAt(0));
+				}
+
+				
+				trace(ddItem.tag, this.tag, this.correctTag, this.result);
+				if (ddItem != null) {
+					if (this.tag == this.correctTag) {
+						ddItem.backgroundColor = 0xAAFFAA;
+					} else {
+						ddItem.backgroundColor = 0xFFAAAA;
+					}
+					
+				}
+
+			}
+
+			protected function init(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.groupLabel.addEventListener(ElementExistenceEvent.ELEMENT_REMOVE, onElementRemove);
+				//this.groupLabel.addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
+			}
+			
+			
+			private function onElementRemove(event:ElementExistenceEvent):void {
+				trace('onElementRemove', this.groupLabel.numElements);
+				if (this.groupLabel.numElements == 1) {
+					this.result = 0;
+					this.dispatchEvent(new ProgressEvent(ProgressEvent.PROGRESS, false, false, this.result, 1));
+				}
+				
+			}
+			
+			/*
+			private function onElementAdd(event:ElementExistenceEvent):void {
+				trace('onElementAdd', this.groupLabel.numElements);
+				this.checkResult();
+				this.displayResult();
+			}
+			*/
+			
+			private var _useSpellingPopup:Boolean = true;
+			
+			public function get useSpellingPopup():Boolean
+			{
+				return _useSpellingPopup;
+			}
+			
+			public function set useSpellingPopup(value:Boolean):void
+			{
+				_useSpellingPopup = value;
+			}
+						
+			
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<s:Rect width="100%"
+			height="100%"
+			radiusX="5"
+			radiusY="5">
+		<s:stroke>
+			<s:SolidColorStroke color="0x555555"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xFFFFFF"/>
+				<s:GradientEntry color="0xAAAAAA"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter blurX="4"
+								blurY="4"
+								alpha="0.22"
+								distance="4"
+								angle="45"
+								knockout="false"/>
+		</s:filters>
+	</s:Rect>
+
+
+	<s:Group width="100%" height="100%" dragDrop="onDragDrop(event)">
+		<s:layout>
+			<s:VerticalLayout paddingTop="8"
+							  paddingBottom="8"
+							  paddingLeft="8"
+							  paddingRight="8"
+							  gap="8"/>
+		</s:layout>
+
+		<mx:Image source="{this.imgSource}"
+				  width="120"
+				  height="120"
+				  dragDrop="onDragDrop(event)"/>
+
+		<!--<s:Label text="{this.correctTag} {this.result}"/>-->
+		<s:Group width="100%" height="30" id="groupLabel">
+		</s:Group>
+
+	</s:Group>
+
+
+</s:Group>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" xmlns:dragdrop="se.cambiata.components.spark.dragdrop.*" xmlns:layouts="org.flexlayouts.layouts.*" xmlns:aaronhardy="com.aaronhardy.*"
+		 creationComplete="init(event)"
+		 
+		 >
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:NumberFormatter id="numFormat" precision="0"   />
+	</fx:Declarations>
+	
+<fx:Script>
+	<![CDATA[
+		import mx.controls.Alert;
+		import mx.events.FlexEvent;
+		import mx.utils.ObjectUtil;
+		//--------------------------------------------------------
+		
+		private var xmlFile:String = '';
+		
+		public function loadXml(xmlFile:String): void {
+			
+			
+			this.xmlFile = xmlFile;
+			var urlLoader: URLLoader = new URLLoader();
+			
+			urlLoader.load(new URLRequest(xmlFile));
+			urlLoader.addEventListener(Event.COMPLETE, onLoadComplete, false, 0, true);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onLoadError, false, 0, true);
+			
+		}
+		
+		private var readyMessage: String = 'FÄÄÄRDIIG!';
+		
+		
+		private function onLoadComplete(event:Event): void {
+			
+			
+			
+			var data:Object = URLLoader(event.target).data;
+			trace(ObjectUtil.toString(data));
+			var xml:XML = XML(data);
+			
+			
+			//this.clearDDSpell();
+			
+			
+			var title:String = xml.@title;
+			var info:String = xml.@info;
+			var readyMessage:String = xml.@readyMessage;
+			
+			
+			trace(title, info);
+			
+			this.panelLabel.title = title;
+			this.lblInfo.text = info;
+			
+			this.panelCards.clearItems();
+			this.panelTargets.clearItems();
+			
+			if (readyMessage)
+				this.readyMessage = readyMessage;
+			
+			for each (var item:XML in xml.item) {
+				trace('hehe', item.@id);
+				
+				
+				var picture:String = item.@picture;
+				var correctTag:String = item.@correctTag;
+				
+				var verifySpelling: String = item.@verifySpelling;
+				
+				var tTarget:String = item.@target;
+				
+				/*
+				var displayWrongChars : String = item.@displayWrongChars;
+				var useWrongCharsMask : String = item.@useWrongCharsMask;
+				var caseSensitive :String = item.@caseSensitive;
+				*/
+				
+				if (picture == null) {
+					Alert.show('Can not find picture tag for card');
+					break;
+				}
+				
+				if (correctTag == null) {
+					Alert.show('Can not find correctTag tag for card');
+					break;
+				}
+				
+				if (correctTag.indexOf('|') > 0) {
+					Alert.show('This module can not handle multiple alternative answers!');
+				}
+				
+				var vs:Boolean = true;
+				if (verifySpelling != '') {
+					vs = (verifySpelling.toLowerCase() == 'true');
+				}
+					
+				var tt:Boolean = true;
+				if (tTarget != '') {
+					tt = (tTarget.toLowerCase() == 'true');
+				}
+				
+				
+				this.panelCards.createItem(correctTag, picture);
+				
+				if (tt == true)
+					this.panelTargets.createItem(correctTag, picture, vs);
+				
+				/*
+				var dwc:Boolean = true;
+				var uwcm:Boolean = true;					
+				
+				if (displayWrongChars != '') {
+					dwc = (displayWrongChars.toLowerCase() == 'true');
+				}
+				
+				if (useWrongCharsMask != '') {
+					uwcm = (useWrongCharsMask.toLowerCase() == 'true');
+				}
+				
+				
+				
+				
+				var cs:Boolean = false;
+				
+				if (caseSensitive != '') {
+					cs = (caseSensitive.toLowerCase() == 'true');
+				}
+				
+				
+				trace('displayWrongChars', dwc);
+				trace('useWrongCharsMask', uwcm);
+				
+				
+				this.createDDSpell(picture, correctTag, dwc, uwcm, cs);
+				*/
+			}
+			
+			this.panelCards.scramble();
+			this.panelTargets.scramble();
+			
+		}
+		
+		private function onLoadError(event:IOErrorEvent): void {
+			Alert.show('Error: Can not load ' + xmlFile);
+		}
+		
+		//-----------------------------------------------------------
+
+		protected function init(event:FlexEvent):void
+		{
+			// TODO Auto-generated method stub
+			this.panelTargets.addEventListener(Event.COMPLETE, onComplete);
+			
+		}
+		
+		private function onComplete(event:Event): void {
+			
+			Alert.show(this.readyMessage);
+		}
+
+
+		protected function onButtonClean(event:MouseEvent):void
+		{
+			// TODO Auto-generated method stub
+			this.loadXml(this.xmlFile);
+		}
+
+	]]>
+</fx:Script>	
+	
+	<s:Panel id="panelLabel" top="0" left="0" right="0" height="90" fontSize="16" >
+		<s:Label width="100%" text="information" left="8" top="8" id="lblInfo" />
+		<s:Label left="8" bottom="8" text="{numFormat.format(this.panelTargets.result * 100)}%" />
+		<aaronhardy:ProgressBar id="progress" left="70" bottom="8" value="{this.panelTargets.result}" maximum="1" width="160" skinClass="com.aaronhardy.ProgressBarSkin" />
+		<s:Button id="btnClean" label="Rensa" right="8" bottom="8" click="onButtonClean(event)" />
+	</s:Panel>
+	
+	<dragdrop:DDPanelCards left="0" width="300" bottom="0" id="panelCards" top="90">
+		
+		<dragdrop:DDItem label="Test1"/>
+		<dragdrop:DDItem label="Test2"/>
+		<dragdrop:DDItem label="Test3"/>
+		<dragdrop:DDItem label="Test4"/>
+		
+		<dragdrop:layout>
+			<layouts:FlowLayout/>
+		</dragdrop:layout>
+		
+	</dragdrop:DDPanelCards>
+	
+	<dragdrop:DDPanelTargets bottom="0" right="0" top="90" left="{this.panelCards.width + 8}" height="100%" backgroundColor="0x555555" id="panelTargets">
+		<dragdrop:DDTargetCard/>
+		<dragdrop:DDTargetCard/>
+		<dragdrop:DDTargetCard/>
+		<dragdrop:DDTargetCard/>
+		
+		<dragdrop:layout>
+			<!--<layouts:FlowLayout/>-->
+			<layouts:CircleLayout  />
+		</dragdrop:layout>
+		
+	</dragdrop:DDPanelTargets>
+	
+
+	
+</s:Group>

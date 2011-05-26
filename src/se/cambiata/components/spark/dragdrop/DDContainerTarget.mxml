@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dragdrop:DDContainerBase xmlns:fx="http://ns.adobe.com/mxml/2009"
+						  xmlns:s="library://ns.adobe.com/flex/spark"
+						  xmlns:mx="library://ns.adobe.com/flex/mx"
+						  xmlns:dragdrop="se.cambiata.components.spark.dragdrop.*"
+						  width="100%"
+						  height="100%"
+						  xmlns:layouts="org.flexlayouts.layouts.*"
+						  dragEnter="onDragEnter(event)"
+						  dragDrop="onDragDrop(event)"
+						  creationComplete="init(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.core.IUIComponent;
+			import mx.core.UIComponent;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.DragManager;
+			
+			import spark.events.ElementExistenceEvent;
+
+			
+			private var _removeCloneOnDrop:Boolean = false;
+			
+			public function get removeCloneOnDrop():Boolean
+			{
+			return _removeCloneOnDrop;
+			}
+			
+			public function set removeCloneOnDrop(value:Boolean):void
+			{
+				_removeCloneOnDrop = value;
+			}
+			
+			protected function onDragEnter(e:DragEvent):void {
+				var dragInitiator:UIComponent = UIComponent(e.dragInitiator);
+				if (dragInitiator is DDItem) {
+					var numChildren:int = UIComponent(e.currentTarget).numChildren;
+					DragManager.acceptDragDrop(e.currentTarget as IUIComponent);
+					
+					
+				}
+			}
+
+
+			protected function onDragDrop(e:DragEvent):void {
+				var dragInitiator:UIComponent = UIComponent(e.dragInitiator);
+				if (dragInitiator is DDItem) {
+					var numChildren:int = UIComponent(e.currentTarget).numChildren;
+
+					var ddItem:DDItem = DDItem(dragInitiator);
+					
+					
+					if (this._removeCloneOnDrop) {
+						
+						var exists:Boolean = this.checkIfEqualExists(ddItem);
+						trace('exists', exists);
+						if (exists) {
+							trace(ddItem.owner);
+							if ((ddItem.owner is DDContainerBase) && (ddItem.owner != this)) {
+								trace('remove!');
+								DDContainerBase(ddItem.owner).removeElement(ddItem);
+								return;
+							}
+						}
+					}
+					
+					if ((this.cloneOnDrop == true) && (ddItem.currentOwner != this) ) {
+						ddItem = ddItem.clone();
+					}
+					
+
+					ddItem.horizontalCenter = 0;
+					ddItem.verticalCenter = 0;
+					
+					
+					trace(ddItem.mouseX);
+					
+					for(var i:int = 0; i < this.numElements; i++) {
+						//if (ddItem.contentMouseX)
+						
+						
+						
+						
+					}
+					
+					
+					this.addElement(ddItem);
+
+						//
+
+
+				}
+			}
+
+			private function checkIfEqualExists(ddItem:DDItem): Boolean {
+				trace('check...');
+				
+				for(var i:int = 0; i < this.numElements; i++) {
+					trace('check', i);
+					if (DDItem(this.getElementAt(i)).equals(ddItem)) return true;										
+				}
+				return false;
+			}
+			
+			
+			
+
+			protected function init(event:FlexEvent):void {
+				this.addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
+				this.addEventListener(ElementExistenceEvent.ELEMENT_REMOVE, onElementRemove);
+				//this.addEventListener(Event.CHANGE, onTargetChange);
+				if (this.scrambleInit) this.scramble();
+				this.recalc();
+				
+			}
+
+			private function onElementAdd(e:ElementExistenceEvent):void {
+
+				//trace('onElementAdd',  this.numElements);
+
+				//this.tag = DDBase(this.getChildAt(0)).tag;
+				//this.dispatchEvent(new Event(Event.CHANGE));
+				this.recalc();
+			}
+
+			private function onElementRemove(e:ElementExistenceEvent):void {
+				//trace('onElementRemove', this.numElements);
+				//this.tag = this._emptyTag;
+				//this.dispatchEvent(new Event(Event.CHANGE));
+				//trace(e.index);
+				this.recalc(e.index);
+			}
+
+			private function onTargetChange(e:Event):void {
+				trace('onTargetChange', this.numElements);
+
+			}
+
+			/*
+			   private function recalc(): void {
+			   this.tag = this.getTag();
+			   this.title = this.tag;
+
+			   }
+
+			   private function getTag():String {
+			   var tag:String = '';
+			   for(var i:int = 0; i < this.numElements; i++) {
+			   tag += DDBase(this.getElementAt(i)).tag;
+			   }
+			   return tag;
+			   }
+			 */
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+</dragdrop:DDContainerBase>

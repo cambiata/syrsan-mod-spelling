@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dragdrop:DragDropBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300"
+		 creationComplete="init(event)" xmlns:layouts="org.flexlayouts.layouts.*" xmlns:dragdrop="se.cambiata.components.spark.dragdrop.*"
+	 
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			
+			import se.cambiata.components.spark.dragdrop.event.DragDropEvent;
+			
+			import spark.events.ElementExistenceEvent;
+			
+			private var _numTargetSpots:int = 5;
+
+			public function get numTargetSpots():int
+			{
+				return _numTargetSpots;
+			}
+
+			public function set numTargetSpots(value:int):void
+			{
+				_numTargetSpots = value;
+				this.createTargetSpots();
+			}
+			
+			
+
+			protected function init(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.createTargetSpots();
+				if (this._initScramble) this.scramble();
+				
+				this.addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
+				this.addEventListener(ElementExistenceEvent.ELEMENT_REMOVE, onElementRemove);
+				
+				
+			}
+			
+			private function onElementAdd(e:ElementExistenceEvent): void {
+				trace('onElementAdd');
+			}
+			private function onElementRemove(e:ElementExistenceEvent): void {
+				trace('onElementRemove');
+				
+			}
+			
+			
+			private function createTargetSpots(): void {
+				this.removeAllElements();
+				for (var i:int; i< this.numTargetSpots; i++) {
+					var dropTarget:DragDropTarget = new DragDropTarget();
+					this.addElement(dropTarget);
+					//dropTarget.addEventListener(DragDropEvent.DRAG_DROP, onDragDrop, false, 0, true);
+					dropTarget.addEventListener(Event.CHANGE, onTargetChange, false, 0, true);
+					//dropTarget.container = this;
+				}
+				this.recalc();
+			}
+			
+			/*
+			private function onDragDrop(e:DragDropEvent): void {
+				this.recalc();
+			}
+			*/
+			
+			private function onTargetChange(e:Event): void {
+				this.recalc();
+			}
+			
+			private var _initScramble:Boolean = false;
+
+			public function get initScramble():Boolean
+			{
+				return _initScramble;
+			}
+
+			public function set initScramble(value:Boolean):void
+			{
+				_initScramble = value;
+			}
+			
+			
+			
+			//--------------------------------------------------
+			
+			public function scramble(): void {
+				var numElements:int = this.numElements;
+				for(var i:int = 0; i < numElements; i++) {
+					var randomIndex:int = Math.abs(Math.random() * numElements);
+					var el:IVisualElement = this.getElementAt(0);
+					this.setElementIndex(el, randomIndex);
+				} 
+				this.recalc();
+			}
+			
+			public function getTagString(): String {
+				var tags:String = '';
+				for(var i:int = 0; i < this.numChildren; i++) {
+					var tag:String = DragDropTarget(this.getChildAt(i)).tag;
+					tags += tag;
+				}
+				return tags;
+			}
+			
+			public function recalc():void  {
+				this.tag = this.getTagString();
+			}
+			
+
+		]]>
+	</fx:Script>
+<!--	<dragdrop:layout>
+
+		<layouts:CircleLayout rotation="300"/>
+	</dragdrop:layout>-->
+	
+	
+		
+	
+</dragdrop:DragDropBase>
