@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="700"
+		 height="100%"
+		 creationComplete="init(event)"
+		 xmlns:aaronhardy="com.aaronhardy.*"
+		 xmlns:layouts="org.flexlayouts.layouts.*"
+		 fontSize="16">
+	<fx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectUtil;
+			
+			import spark.effects.Animate;
+			import spark.effects.animation.MotionPath;
+			import spark.effects.animation.SimpleMotionPath;
+
+			protected function init(event:FlexEvent):void {
+				// TODO Auto-generated method stub
+
+			/*
+			   this.createDDSpell('akerbar.png', 'åkerbär');
+			   this.createDDSpell('bjornbar.png', 'björnbär');
+			   this.createDDSpell('ronnbar.png', 'rönnbär');
+			   this.createDDSpell('blabar.png', 'blåbär');
+			   this.createDDSpell('hallon.png', 'hallon');
+			   this.createDDSpell('lingon.png', 'lingon');
+			   this.createDDSpell('smultron.png', 'smultron');
+			 */
+			}
+
+			public function clearDDSpell():void {
+
+				this.itemGroup.removeAllElements();
+				//this.onSpellProgress();
+				this.result = 0;
+			}
+
+			public function createDDSpell(imgSource:String, correctTag:String, displayWrongChars:Boolean = true, useWrongCharsMask:Boolean = true, caseSensitive:Boolean = false):void {
+				var ddSpell:DDSpell1 = new DDSpell1();
+				ddSpell.imgSource = imgSource;
+				ddSpell.correctTag = correctTag;
+
+				ddSpell.displayWrongChars = displayWrongChars;
+				ddSpell.useWrongCharsMask = useWrongCharsMask;
+				ddSpell.caseSensitive = caseSensitive;
+
+
+				this.itemGroup.addElement(ddSpell);
+
+				ddSpell.addEventListener(ProgressEvent.PROGRESS, onSpellProgress, false, 0, true);
+
+			}
+
+			private function onSpellProgress(event:ProgressEvent = null):void {
+
+				//trace(event.bytesLoaded, event.bytesTotal, this.itemGroup.numElements);
+
+
+				var sumResult:Number = 0;
+				var totalResult:Number = this.itemGroup.numElements;
+
+				for (var i:int = 0; i < this.itemGroup.numElements; i++) {
+
+
+
+					var ddSpell:DDSpell1 = DDSpell1(this.itemGroup.getElementAt(i));
+
+					sumResult += ddSpell.result;
+
+
+
+				}
+
+				trace(sumResult, totalResult);
+				this.result = sumResult / totalResult;
+
+
+
+			}
+
+
+			private var readyMessage:String = 'FÄÄÄRDIIG!';
+
+			private var _result:Number = 0;
+
+
+			[Bindable]
+			public function get result():Number {
+				return _result;
+			}
+
+			public function set result(value:Number):void {
+				_result = value;
+
+				var ani:Animate = new Animate(this.progress);
+				ani.duration = 500;
+				var motionPath:SimpleMotionPath = new SimpleMotionPath('value', this.progress.value, this._result);
+				ani.motionPaths = new Vector.<MotionPath>;
+				ani.motionPaths.push(motionPath);
+				ani.play();
+
+				if (result == 1) {
+					Alert.show(this.readyMessage);
+					this.btnGoTo.enabled = true;
+				}
+
+			}
+
+
+			//--------------------------------------------------------
+
+			private var xmlFile:String = '';
+
+			public function loadXml(xmlFile:String):void {
+
+
+				this.xmlFile = xmlFile;
+				var urlLoader:URLLoader = new URLLoader();
+
+				urlLoader.load(new URLRequest(xmlFile));
+				urlLoader.addEventListener(Event.COMPLETE, onLoadComplete, false, 0, true);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onLoadError, false, 0, true);
+
+			}
+
+			private function onLoadComplete(event:Event):void {
+
+
+				var data:Object = URLLoader(event.target).data;
+				trace(ObjectUtil.toString(data));
+				var xml:XML = XML(data);
+
+
+				this.clearDDSpell();
+				
+				this.readyGoTo = xml.@readyGoTo;
+
+				var title:String = xml.@title;
+				var info:String = xml.@info;
+
+				var readyMessage:String = xml.@readyMessage;
+
+
+				this.title = title;
+				this.lblInfo.text = info;
+
+				if (readyMessage)
+					this.readyMessage = readyMessage;
+
+
+
+				trace(title, info);
+
+				for each (var item:XML in xml.item) {
+					trace('hehe', item.@id);
+
+					var picture:String = item.@picture;
+					var correctTag:String = item.@correctTag;
+					var displayWrongChars:String = item.@displayWrongChars;
+					var useWrongCharsMask:String = item.@useWrongCharsMask;
+					var caseSensitive:String = item.@caseSensitive;
+
+
+					if (picture == null) {
+						Alert.show('Can not find picture tag for card');
+						break;
+					}
+
+					if (correctTag == null) {
+						Alert.show('Can not find correctTag tag for card');
+						break;
+					}
+
+
+					var dwc:Boolean = true;
+					var uwcm:Boolean = true;
+
+					if (displayWrongChars != '') {
+						dwc = (displayWrongChars.toLowerCase() == 'true');
+					}
+
+					if (useWrongCharsMask != '') {
+						uwcm = (useWrongCharsMask.toLowerCase() == 'true');
+					}
+
+					var cs:Boolean = false;
+
+					if (caseSensitive != '') {
+						cs = (caseSensitive.toLowerCase() == 'true');
+					}
+
+
+					trace('displayWrongChars', dwc);
+					trace('useWrongCharsMask', uwcm);
+
+
+					this.createDDSpell(picture, correctTag, dwc, uwcm, cs);
+				}
+
+				this.scramble();
+
+			}
+
+			private function onLoadError(event:IOErrorEvent):void {
+				Alert.show('Error: Can not load ' + xmlFile);
+			}
+
+			//-----------------------------------------------------------
+
+
+			protected function onBtnCleanClick(event:MouseEvent):void {
+				for (var i:int = 0; i < this.itemGroup.numElements; i++) {
+					var ddSpell:DDSpell1 = DDSpell1(this.itemGroup.getElementAt(i));
+
+					ddSpell.clean();
+				}
+				this.onSpellProgress();
+
+			}
+			
+			public function scramble() : void {
+				
+				var numElements:int = this.itemGroup.numElements;
+				for (var i:int = 0; i < 20; i++) {
+					var idx:int = Math.abs(Math.random() * numElements);
+					this.itemGroup.setElementIndex(this.itemGroup.getElementAt(idx), 0);
+				}
+				
+			}			
+			
+			private var readyGoTo:String = '';
+			
+			protected function onBtnGoTo(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest(readyGoTo));
+				
+			}
+			
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:NumberFormatter id="numFormat" precision="0"/>
+	</fx:Declarations>
+
+	<s:Panel width="100%" height="100%" top="60" backgroundColor="0x555555">
+
+
+		<s:Scroller width="100%" height="100%">
+			<s:Group id="itemGroup" width="100%" height="100%">
+				<s:layout>
+					<layouts:FlowLayout padding="8"/>
+				</s:layout>
+			</s:Group>
+		</s:Scroller>
+	</s:Panel>
+
+	<s:Group id="group" width="100%" height="60">
+		<s:Label width="100%"
+				 text="information"
+				 left="8"
+				 top="8"
+				 id="lblInfo"/>
+		<s:Label left="8" bottom="8" text="{numFormat.format(((this.result * this.itemGroup.numElements) / this.itemGroup.numElements) * 100)}%"/>
+		<aaronhardy:ProgressBar id="progress"
+								left="70"
+								bottom="8"
+								value="{this.result}"
+								maximum="1"
+								width="160"
+								skinClass="com.aaronhardy.ProgressBarSkin"/>
+		<s:Button id="btnClean"
+				  label="Rensa"
+				  right="126"
+				  bottom="8"
+				  click="onBtnCleanClick(event)"/>
+		<s:Button id="btnGoTo"
+				  label="Gå vidare >"
+				  right="8"
+				  bottom="8"
+				  width="110"
+				  enabled="false"
+				  click="onBtnGoTo(event)"
+				  >		
+			
+		</s:Button>
+
+
+
+	</s:Group>
+
+
+
+</s:Panel>

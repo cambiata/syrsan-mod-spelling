@@ -4,7 +4,7 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   minWidth="600"
 			   minHeight="400"
-			   creationComplete="init()" xmlns:local="*" xmlns:controls="com.brightPoint.controls.*">
+			   creationComplete="init()" xmlns:local="*" xmlns:controls="com.brightPoint.controls.*" xmlns:dragdrop="se.cambiata.components.spark.dragdrop.*">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -38,7 +38,7 @@
 		]]>
 	</fx:Script>
 	
-	<local:DDPanel id="ddPanel" width="100%" height="100%" bottom="0"/>
+	<dragdrop:DDPanel id="ddPanel" width="100%" height="100%" bottom="0"/>
 	
 </s:Application>
 

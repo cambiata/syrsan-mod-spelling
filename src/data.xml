@@ -1,4 +1,4 @@
-<data title="What species?" info="Write the names of the species in the text box to the right of each picture. In English, please!" readyMessage="Contratulations! Please continue with..!">
+<data title="What species?" info="Write the names of the species in the text box to the right of each picture. In English, please!" readyMessage="Contratulations! Please continue with..!" readyGoTo="http://wikipedia.se">
 
 	<item picture="pictures/elephant.png" correctTag="elephant|elelphants"  />
 
